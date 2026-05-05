@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b111a" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f0f7fa" media="(prefers-color-scheme: light)">
     <title data-i18n="title">SOUL Екосистема</title>
     <style>
         :root {
@@ -34,6 +36,21 @@
             padding: 0;
             box-sizing: border-box;
             transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        button.icon-btn {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .action-btn {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .close-btn {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -182,6 +199,7 @@
             border-radius: 0;
             mask-image: none;
             -webkit-mask-image: none;
+            will-change: transform;
         }
 
         .timeline-stream-shell::before {
@@ -543,15 +561,13 @@
             h1 { font-size: 2.5rem; }
 
             .timeline {
-                gap: 2.5rem;
+                gap: 3rem;
                 padding-top: 1rem;
-                padding-left: 65px; /* Простір для променя зліва */
-                padding-right: 1rem;
             }
 
             .timeline-stream {
-                left: 32px; /* Центр променя */
-                width: 90px;
+                left: 50%;
+                width: 160px;
                 transform: translateX(-50%);
             }
 
@@ -560,87 +576,99 @@
             }
 
             .timeline-stream-glow {
-                width: 64px;
+                width: 126px;
             }
 
             .timeline-stream-shell {
-                width: 48px;
+                width: 92px;
             }
 
             .timeline-row {
-                display: flex;
-                flex-direction: column;
-                gap: 1rem;
-                align-items: flex-start;
-                min-height: auto;
-                position: relative;
+                grid-template-columns: minmax(0, 1fr) 50px minmax(0, 1fr);
+                gap: 0.75rem;
+                align-items: center;
+                min-height: 220px;
             }
 
             .timeline-content {
-                width: 100%;
-            }
-
-            .timeline-content:not(.timeline-text) {
-                order: 1; /* Плашка зверху */
-            }
-
-            .timeline-text {
-                order: 2; /* Текст знизу */
-                text-align: left !important;
-                padding: 0;
+                width: auto;
             }
 
             .timeline-center {
-                position: absolute;
-                left: -33px; /* На центр променя */
-                top: 40px; /* Вирівнювання біля карточки */
-                transform: translateX(-50%);
-                min-width: 40px;
-                height: 48px;
-                border-radius: 20px;
-                font-size: 0.75rem;
-                letter-spacing: 0;
+                min-width: 50px;
+                height: 32px;
+                border-radius: 12px;
+                font-size: 0.72rem;
+                letter-spacing: 0.12em;
+                background: rgba(20, 31, 46, 0.85);
+                backdrop-filter: none;
+                box-shadow: 0 0 8px rgba(92, 156, 184, 0.2);
+            }
+
+            [data-theme="dark"] .timeline-center {
+                background: rgba(20, 31, 46, 0.92);
+            }
+
+            .text-left,
+            .text-right {
                 padding: 0;
-                z-index: 10;
             }
 
             .timeline-text h2 {
-                font-size: 1.35rem;
-                margin-bottom: 0.4rem;
-                margin-top: 0.5rem;
+                font-size: 1.18rem;
+                margin-bottom: 0.5rem;
             }
 
             .timeline-text p {
-                font-size: 0.95rem;
-                line-height: 1.5;
+                font-size: 0.88rem;
+                line-height: 1.45;
             }
 
             .card {
-                height: auto;
-                min-height: 130px;
-                border-radius: 24px;
-                padding: 1.5rem;
-                align-items: flex-start;
-                text-align: left;
-                justify-content: flex-end;
+                height: 164px;
+                border-radius: 22px;
             }
 
             .card h3 {
-                font-size: 1.4rem;
-                padding: 0;
-                margin-top: 3rem;
+                font-size: 1rem;
+                padding: 0 0.6rem;
             }
 
             .card-icon {
-                top: 16px;
-                right: 16px;
-                width: 42px;
-                height: 42px;
+                top: 12px;
+                right: 12px;
+                width: 36px;
+                height: 36px;
+            }
+
+            .portal-container {
+                justify-content: center;
+                padding-left: 0;
             }
 
             .portal {
-                width: 140px;
-                height: 36px;
+                width: 210px;
+                height: 52px;
+            }
+
+            * {
+                transition: none;
+            }
+
+            button.icon-btn,
+            .action-btn,
+            .close-btn,
+            .card {
+                transition: color 0.2s ease, background-color 0.2s ease;
+            }
+
+            .modal-overlay {
+                background: rgba(0,0,0,0.6);
+                backdrop-filter: none;
+            }
+
+            .timeline-stream-glow {
+                filter: blur(8px);
             }
         }
 
@@ -1021,7 +1049,10 @@
     </footer>
 
     <script>
-        // Translations
+        const isMobile = window.innerWidth <= 768 || 'ontouchstart' in window || /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isLowEnd = (navigator.deviceMemory && navigator.deviceMemory < 2) || window.innerWidth < 480;
+
         const translations = {
             uk: {
                 "title": "SOUL Екосистема",
@@ -1230,6 +1261,9 @@
             let lastScrollY = window.scrollY || window.pageYOffset || 0;
             let lastScrollDirection = 1;
             let scrollTicking = false;
+            let loadedFrames = new Set();
+            let frameObserver = null;
+            let resizeTicking = false;
 
             function syncStreamLayout() {
                 const firstRow = timelineRows[0];
@@ -1313,6 +1347,39 @@
                 }
             }
 
+            function loadFrame(index) {
+                if (loadedFrames.has(index) || index < 0 || index >= frameCount) {
+                    return;
+                }
+                loadedFrames.add(index);
+                const image = new Image();
+                image.decoding = 'async';
+                image.src = framePath(index);
+                image.onload = () => {
+                    frames[index] = image;
+                    if (currentFrame === -1 && index === 0) {
+                        streamWrapper.dataset.ready = 'true';
+                        syncStreamLayout();
+                        resizeCanvases();
+                        updateSequenceFromScroll(true);
+                    }
+                };
+            }
+
+            function lazyLoadFrames(visibleRange, buffer = 30) {
+                const start = Math.max(0, visibleRange.start - buffer);
+                const end = Math.min(frameCount - 1, visibleRange.end + buffer);
+                
+                const maxInitial = isMobile ? 15 : 30;
+                for (let i = 0; i < Math.min(maxInitial, frameCount); i++) {
+                    loadFrame(i);
+                }
+                
+                for (let i = start; i <= end; i++) {
+                    loadFrame(i);
+                }
+            }
+
             function getProcessedFrame(index) {
                 if (segmentFrames[index]) {
                     return segmentFrames[index];
@@ -1340,7 +1407,10 @@
                 const sourceHeight = Math.round(frame.naturalHeight * 0.9);
 
                 segmentContext.clearRect(0, 0, segmentCanvas.width, segmentCanvas.height);
-                segmentContext.filter = 'brightness(1.32) contrast(1.18) saturate(1.16)';
+                
+                if (!isMobile && !prefersReducedMotion) {
+                    segmentContext.filter = 'brightness(1.32) contrast(1.18) saturate(1.16)';
+                }
                 segmentContext.drawImage(
                     frame,
                     sourceX,
@@ -1393,6 +1463,8 @@
             }
 
             function paintBeamBackdrop() {
+                if (prefersReducedMotion || isLowEnd) return;
+                
                 const canvasWidth = stream.width;
                 const canvasHeight = stream.height;
                 const centerX = canvasWidth / 2;
@@ -1407,7 +1479,8 @@
                 auraGradient.addColorStop(0.82, 'rgba(52, 211, 255, 0.22)');
                 auraGradient.addColorStop(1, 'rgba(126, 233, 255, 0.12)');
 
-                streamContext.filter = `blur(${16 * (window.devicePixelRatio || 1)}px)`;
+                const blurAmount = isMobile ? 8 : (16 * (window.devicePixelRatio || 1));
+                streamContext.filter = `blur(${blurAmount}px)`;
                 streamContext.fillStyle = auraGradient;
                 streamContext.globalAlpha = 0.58;
                 streamContext.fillRect(centerX - glowWidth, 0, glowWidth * 2, canvasHeight);
@@ -1442,7 +1515,8 @@
                 const segmentWidth = baseFrame.width * 1.3;
                 const segmentHeight = baseFrame.height * 1.78;
                 const spacing = segmentHeight * 0.62;
-                const beamCount = Math.ceil(canvasHeight / spacing) + 3;
+                const maxBeams = isMobile ? 4 : 12;
+                const beamCount = Math.min(Math.ceil(canvasHeight / spacing) + 2, maxBeams);
 
                 paintBeamBackdrop();
 
@@ -1461,7 +1535,8 @@
                     streamContext.save();
                     streamContext.translate(centerX, baseY + segmentHeight * 0.5);
                     streamContext.scale(1, isMirrored ? -1 : 1);
-                    streamContext.filter = `blur(${1.2 * (window.devicePixelRatio || 1)}px)`;
+                    const blurPx = isMobile ? 0.6 : (1.2 * (window.devicePixelRatio || 1));
+                    streamContext.filter = `blur(${blurPx}px)`;
                     streamContext.globalAlpha = mainAlpha * 0.52;
                     streamContext.drawImage(segmentFrame, -segmentWidth / 2, -segmentHeight / 2, segmentWidth, segmentHeight);
                     streamContext.filter = 'none';
@@ -1472,7 +1547,8 @@
 
                 streamContext.save();
                 streamContext.globalCompositeOperation = 'screen';
-                streamContext.filter = `blur(${8 * (window.devicePixelRatio || 1)}px)`;
+                const coreBlur = isMobile ? 4 : (8 * (window.devicePixelRatio || 1));
+                streamContext.filter = `blur(${coreBlur}px)`;
                 streamContext.globalAlpha = 0.24;
                 streamContext.fillStyle = 'rgba(170, 245, 255, 0.95)';
                 streamContext.fillRect(centerX - 3, 0, 6, canvasHeight);
@@ -1495,6 +1571,7 @@
                 }
 
                 const targetIndex = Math.round(getScrollProgress() * (frameCount - 1));
+                lazyLoadFrames({ start: Math.max(0, targetIndex - 5), end: Math.min(frameCount - 1, targetIndex + 5) });
                 const renderableIndex = findRenderableFrame(targetIndex, lastScrollDirection);
 
                 if (renderableIndex === -1) {
@@ -1522,32 +1599,29 @@
                 });
             }
 
-            for (let index = 0; index < frameCount; index += 1) {
-                const image = new Image();
-                image.decoding = 'async';
-                image.src = framePath(index);
-
-                image.onload = () => {
-                    frames[index] = image;
-
-                    if (currentFrame === -1) {
-                        streamWrapper.dataset.ready = 'true';
-                        syncStreamLayout();
-                        resizeCanvases();
-                        updateSequenceFromScroll(true);
-                    }
-                };
-
-                frames[index] = image;
-            }
-
             window.addEventListener('scroll', handleScroll, { passive: true });
 
+            let resizeTimeout;
             window.addEventListener('resize', () => {
-                syncStreamLayout();
-                resizeCanvases();
-                updateSequenceFromScroll(true);
+                if (resizeTimeout) clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
+                    syncStreamLayout();
+                    resizeCanvases();
+                    updateSequenceFromScroll(true);
+                }, 150);
             });
+
+            const timelineObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        lazyLoadFrames({ start: 0, end: isMobile ? 15 : 30 });
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            timelineObserver.observe(streamWrapper);
+
+            lazyLoadFrames({ start: 0, end: isMobile ? 10 : 20 });
 
             syncStreamLayout();
             resizeCanvases();
